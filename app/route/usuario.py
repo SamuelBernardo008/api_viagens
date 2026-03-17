@@ -5,7 +5,7 @@ from app.models.usuario import UsuarioModel
 from app.schema.usuario import UsuarioSchema, UsuarioUpdateSchema
 
 
-usuario = APIRouter()
+usuario = APIRouter(tags=["Usuários"])
 
 @usuario.post("/")
 async def criar_usuario(dados: UsuarioSchema, db: Session = Depends(get_db)):
@@ -20,7 +20,7 @@ async def listar_usuarios(db: Session = Depends(get_db)):
     return db.query(UsuarioModel).all()
 
 
-@usuario.put("/update/{usuario_id}")
+@usuario.put("/updateUsuario/{usuario_id}")
 async def atualizar_usuario(usuario_id: int, dados: UsuarioUpdateSchema, db: Session = Depends(get_db)):
     usuario_api = db.query(UsuarioModel).filter(UsuarioModel.id == usuario_id).first()
 
@@ -36,7 +36,7 @@ async def atualizar_usuario(usuario_id: int, dados: UsuarioUpdateSchema, db: Ses
 
     return {"message": "Usuário atualizado com sucesso", "usuario": usuario_api}
 
-@usuario.delete("/delete/{usuario_id}")
+@usuario.delete("/deleteUsuario/{usuario_id}")
 async def deletar_usuario(usuario_id: int, db: Session = Depends(get_db)):
     usuario_api = db.query(UsuarioModel).filter(UsuarioModel.id == usuario_id).first()
 
