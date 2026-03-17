@@ -1,13 +1,17 @@
-from sqlalchemy import Column, ForeignKey, Integer, Float, String
+from sqlalchemy import Column, ForeignKey, Integer, String, Boolean
 from sqlalchemy.orm import relationship
 from app.database import Base
 
-class PassageiroModel(Base):
-    __tablename__ = ""
+class VeiculoModel(Base):
+    __tablename__ = "veiculo"
 
     id = Column(Integer, primary_key=True, index=True)
-    usuario_id = Column(Integer, ForeignKey("usuario.id"), nullable=False)
-    media_avaliacao = Column(Float, nullable=True)
-    cnh = Column(String(9), nullable=False, unique=True)
+    placa = Column(String(7), nullable=False, unique=True)
+    id_modelo_veiculo = Column(Integer, ForeignKey("modelo_veiculo.id"), nullable=False)
+    tem_seguro = Column(Boolean, nullable=False, default=False)
+    id_classe = Column(Integer, ForeignKey("classe.id"), nullable=False)
+
     
-    usuario_pai = relationship("UsuarioModel", back_populates="motorista")
+    id_modelo_veiculo = relationship("ModeloVeiculoModel", back_populates="veiculo")
+    classe = relationship("ClasseModel", back_populates="veiculo")
+

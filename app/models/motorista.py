@@ -2,7 +2,7 @@ from sqlalchemy import Column, ForeignKey, Integer, Float, String
 from sqlalchemy.orm import relationship
 from app.database import Base
 
-class PassageiroModel(Base):
+class MotoristaModel(Base):
     __tablename__ = "motorista"
 
     id = Column(Integer, primary_key=True, index=True)

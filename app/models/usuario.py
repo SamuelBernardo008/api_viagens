@@ -14,3 +14,4 @@ class UsuarioModel(Base):
     nome_usuario = Column(String(255), nullable=False, unique=True)
 
     passageiro = relationship("PassageiroModel", back_populates="usuario_pai", uselist=False)
+    motorista = relationship("MotoristaModel", back_populates="usuario_pai", uselist=False)
