@@ -20,3 +20,4 @@ class ModeloVeiculoModel(Base):
     id_combustivel = Column(Integer, ForeignKey("combustivel.id"), nullable=False)
 
     combustivel = relationship("CombustivelModel", back_populates="modelo_veiculo")
+    veiculos = relationship("VeiculoModel", back_populates="modelo")

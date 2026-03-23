@@ -10,4 +10,5 @@ class ClasseModel(Base):
     fator_preco = Column(Float, nullable=False)
 
     
-    veiculo = relationship("VeiculoModel", back_populates="classe")
+    veiculos = relationship("VeiculoModel", back_populates="classe")
+    servicos = relationship("ServicoModel", back_populates="classe")

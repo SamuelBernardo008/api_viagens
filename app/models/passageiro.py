@@ -10,3 +10,4 @@ class PassageiroModel(Base):
     media_avaliacao = Column(Float, nullable=True)
 
     usuario_pai = relationship("UsuarioModel", back_populates="passageiro")
+    corrida = relationship("CorridaModel", back_populates="passageiro")

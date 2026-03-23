@@ -7,13 +7,13 @@ from app.models.modelo_veiculo import ModeloVeiculoModel
 
 veiculo = APIRouter(tags=["Veículos"])
 
-@veiculo.post("/criarVeiculo")
+@veiculo.post("/Criar")
 async def criar_veiculo(dados: VeiculoSchema, db: Session = Depends(get_db)):
-    modelo_existe = db.query(ModeloVeiculoModel).filter(ModeloVeiculoModel.id == dados.id_modelo).first()
+    modelo_existe = db.query(ModeloVeiculoModel).filter(ModeloVeiculoModel.id == dados.id_modelo_veiculo).first()
     if not modelo_existe:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, 
-            detail=f"Modelo com ID {dados.id_modelo} não encontrado."
+            detail=f"Modelo com ID {dados.id_modelo_veiculo} não encontrado."
         )
     
     placa_duplicada = db.query(VeiculoModel).filter(VeiculoModel.placa == dados.placa).first()
@@ -29,11 +29,25 @@ async def criar_veiculo(dados: VeiculoSchema, db: Session = Depends(get_db)):
     db.refresh(novo_veiculo)
     return novo_veiculo
 
-@veiculo.get("/veiculos")
+@veiculo.get("/Listar")
 async def listar_veiculos(db: Session = Depends(get_db)):
     return db.query(VeiculoModel).all()
 
-@veiculo.put("/updateVeiculo/{veiculo_id}")
+@veiculo.get("/Buscar/{veiculo_id}")
+async def buscar_veiculo(veiculo_id: int, db: Session = Depends(get_db)):
+    # Buscamos o veículo pelo ID
+    veiculo_db = db.query(VeiculoModel).filter(VeiculoModel.id == veiculo_id).first()
+
+    # Se não existir, retornamos 404
+    if not veiculo_db:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="Veículo não encontrado."
+        )
+
+    return veiculo_db
+
+@veiculo.put("/Atualizar/{veiculo_id}")
 async def atualizar_veiculo(veiculo_id: int, dados: VeiculoUpdateSchema, db: Session = Depends(get_db)):
     veiculo_db = db.query(VeiculoModel).filter(VeiculoModel.id == veiculo_id).first()
 
@@ -49,7 +63,7 @@ async def atualizar_veiculo(veiculo_id: int, dados: VeiculoUpdateSchema, db: Ses
 
     return {"message": "Veículo atualizado com sucesso", "veiculo": veiculo_db}
 
-@veiculo.delete("/deleteVeiculo/{veiculo_id}")
+@veiculo.delete("/Apagar/{veiculo_id}")
 async def deletar_veiculo(veiculo_id: int, db: Session = Depends(get_db)):
     veiculo_db = db.query(VeiculoModel).filter(VeiculoModel.id == veiculo_id).first()
 

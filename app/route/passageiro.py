@@ -7,7 +7,7 @@ from app.models.usuario import UsuarioModel
 
 passageiro = APIRouter(tags=["Passageiros"])
 
-@passageiro.post("/criarPassageiro")
+@passageiro.post("/Criar")
 async def criar_passageiro(dados: PassageiroSchema, db: Session = Depends(get_db)):
     usuario_existe = db.query(UsuarioModel).filter(UsuarioModel.id == dados.usuario_id).first()
     
@@ -30,12 +30,19 @@ async def criar_passageiro(dados: PassageiroSchema, db: Session = Depends(get_db
     db.refresh(novo_passageiro)
     return novo_passageiro
 
-@passageiro.get("/passageiros")
+@passageiro.get("/Listar")
 async def listar_passageiros(db: Session = Depends(get_db)):
     return db.query(PassageiroModel).all()
 
+@passageiro.get("/Buscar/{passageiro_id}")
+async def buscar_passageiro(passageiro_id: int, db: Session = Depends(get_db)):
+    passageiro_buscado = db.query(PassageiroModel).filter(PassageiroModel.id == passageiro_id).first()
+    if not passageiro_buscado:
+        raise HTTPException(status_code=404, detail="Passageiro não encontrado")
+    return passageiro_buscado
 
-@passageiro.put("/updatePassageiro/{passageiro_id}")
+
+@passageiro.put("/Atualizar/{passageiro_id}")
 async def atualizar_passageiro(passageiro_id: int, dados: PassageiroUpdateSchema, db: Session = Depends(get_db)):
     passageiro_api = db.query(PassageiroModel).filter(PassageiroModel.id == passageiro_id).first()
 
@@ -51,7 +58,7 @@ async def atualizar_passageiro(passageiro_id: int, dados: PassageiroUpdateSchema
 
     return {"message": "Passageiro atualizado com sucesso", "Passageiro": passageiro_api}
 
-@passageiro.delete("/deletePassageiro/{passageiro_id}")
+@passageiro.delete("/Apagar/{passageiro_id}")
 async def deletar_passageiro(passageiro_id: int, db: Session = Depends(get_db)):
     passageiro_api = db.query(PassageiroModel).filter(PassageiroModel.id == passageiro_id).first()
 

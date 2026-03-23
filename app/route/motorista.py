@@ -7,7 +7,7 @@ from app.models.usuario import UsuarioModel
 
 motorista = APIRouter(tags=["Motoristas"])
 
-@motorista.post("/criarMotorista")
+@motorista.post("/Criar")
 async def criar_motorista(dados: MotoristaSchema, db: Session = Depends(get_db)):
     usuario_existe = db.query(UsuarioModel).filter(UsuarioModel.id == dados.usuario_id).first()
     
@@ -30,12 +30,26 @@ async def criar_motorista(dados: MotoristaSchema, db: Session = Depends(get_db))
     db.refresh(novo_motorista)
     return novo_motorista
 
-@motorista.get("/motoristas")
+@motorista.get("/Listar")
 async def listar_motoristas(db: Session = Depends(get_db)):
     return db.query(MotoristaModel).all()
 
+@motorista.get("/Buscar/{motorista_id}")
+async def buscar_motorista(motorista_id: int, db: Session = Depends(get_db)):
+    # Faz a consulta no banco de dados pelo ID
+    motorista_api = db.query(MotoristaModel).filter(MotoristaModel.id == motorista_id).first()
 
-@motorista.put("/updateMotoristas/{motorista_id}")
+    # Se não encontrar, retorna o erro 404
+    if not motorista_api:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail=f"Motorista com ID {motorista_id} não encontrado."
+        )
+
+    return motorista_api
+
+
+@motorista.put("/Atualizar/{motorista_id}")
 async def atualizar_motorista(motorista_id: int, dados: MotoristaUpdateSchema, db: Session = Depends(get_db)):
     motorista_api = db.query(MotoristaModel).filter(MotoristaModel.id == motorista_id).first()
 
@@ -51,7 +65,7 @@ async def atualizar_motorista(motorista_id: int, dados: MotoristaUpdateSchema, d
 
     return {"message": "Motorista atualizado com sucesso", "Motorista": motorista_api}
 
-@motorista.delete("/deleteMotorista/{motorista_id}")
+@motorista.delete("/Apagar/{motorista_id}")
 async def deletar_motorista(motorista_id: int, db: Session = Depends(get_db)):
     motorista_api = db.query(MotoristaModel).filter(MotoristaModel.id == motorista_id).first()
 

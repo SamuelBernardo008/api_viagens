@@ -11,3 +11,5 @@ class MotoristaModel(Base):
     cnh = Column(String(9), nullable=False, unique=True)
     
     usuario_pai = relationship("UsuarioModel", back_populates="motorista")
+    motorista_veiculo = relationship("MotoristaVeiculoModel", back_populates="motorista")
+    corrida= relationship("CorridaModel", back_populates="motorista")

@@ -12,6 +12,7 @@ class VeiculoModel(Base):
     id_classe = Column(Integer, ForeignKey("classe.id"), nullable=False)
 
     
-    id_modelo_veiculo = relationship("ModeloVeiculoModel", back_populates="veiculo")
-    classe = relationship("ClasseModel", back_populates="veiculo")
+    modelo = relationship("ModeloVeiculoModel", back_populates="veiculos")
+    classe = relationship("ClasseModel", back_populates="veiculos")
+    motorista_veiculo = relationship("MotoristaVeiculoModel", back_populates="veiculo")
 

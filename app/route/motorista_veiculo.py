@@ -2,60 +2,68 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.motorista_veiculo import MotoristaVeiculoModel
-from app.schema.motorista_veiculo import MotoristaVeiculoSchema, MotoristaVeiculoUpdateSchema 
-from app.models.modelo_veiculo import ModeloVeiculoModel 
+from app.models.veiculo import VeiculoModel
+from app.models.motorista import MotoristaModel 
+from app.schema.motorista_veiculo import MotoristaVeiculoSchema, MotoristaVeiculoUpdateSchema
 
-veiculo = APIRouter(tags=["Veículos"])
+motorista_veiculo = APIRouter(tags=["Motorista/Veículo"])
 
-@veiculo.post("/criarVeiculo")
-async def criar_veiculo(dados: VeiculoSchema, db: Session = Depends(get_db)):
-    modelo_existe = db.query(ModeloVeiculoModel).filter(ModeloVeiculoModel.id == dados.id_modelo).first()
-    if not modelo_existe:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
-            detail=f"Modelo com ID {dados.id_modelo} não encontrado."
-        )
+@motorista_veiculo.post("/Criar")
+async def vincular_motorista(dados: MotoristaVeiculoSchema, db: Session = Depends(get_db)):
+    # 1. Valida se o Motorista existe
+    motorista = db.query(MotoristaModel).filter(MotoristaModel.id == dados.id_motorista).first()
+    if not motorista:
+        raise HTTPException(status_code=404, detail="Motorista não encontrado.")
+
+    # 2. Valida se o Veículo existe
+    veiculo = db.query(VeiculoModel).filter(VeiculoModel.id == dados.id_veiculo).first()
+    if not veiculo:
+        raise HTTPException(status_code=404, detail="Veículo não encontrado.")
+
+    # 3. Lógica extra (Opcional): Verificar se o veículo já está em uso (sem data_fim)
+    uso_atual = db.query(MotoristaVeiculoModel).filter(
+        MotoristaVeiculoModel.id_veiculo == dados.id_veiculo,
+        MotoristaVeiculoModel.datahora_fim == None
+    ).first()
     
-    placa_duplicada = db.query(VeiculoModel).filter(VeiculoModel.placa == dados.placa).first()
-    if placa_duplicada:
+    if uso_atual:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
-            detail="Já existe um veículo cadastrado com esta placa."
+            status_code=400, 
+            detail=f"Este veículo já está sendo utilizado pelo motorista ID {uso_atual.id_motorista}"
         )
 
-    novo_veiculo = VeiculoModel(**dados.model_dump())
-    db.add(novo_veiculo)
+    novo_vinculo = MotoristaVeiculoModel(**dados.model_dump())
+    db.add(novo_vinculo)
     db.commit()
-    db.refresh(novo_veiculo)
-    return novo_veiculo
+    db.refresh(novo_vinculo)
+    return novo_vinculo
 
-@veiculo.get("/veiculos")
-async def listar_veiculos(db: Session = Depends(get_db)):
-    return db.query(VeiculoModel).all()
+@motorista_veiculo.get("/Listar")
+async def listar_vinculos(db: Session = Depends(get_db)):
+    return db.query(MotoristaVeiculoModel).all()
 
-@veiculo.put("/updateVeiculo/{veiculo_id}")
-async def atualizar_veiculo(veiculo_id: int, dados: VeiculoUpdateSchema, db: Session = Depends(get_db)):
-    veiculo_db = db.query(VeiculoModel).filter(VeiculoModel.id == veiculo_id).first()
+@motorista_veiculo.put("/Atualizar/{vinculo_id}")
+async def atualizar_vinculo(vinculo_id: int, dados: MotoristaVeiculoUpdateSchema, db: Session = Depends(get_db)):
+    vinculo_db = db.query(MotoristaVeiculoModel).filter(MotoristaVeiculoModel.id == vinculo_id).first()
 
-    if not veiculo_db:
-        raise HTTPException(status_code=404, detail="Veículo não encontrado")
+    if not vinculo_db:
+        raise HTTPException(status_code=404, detail="Vínculo não encontrado")
     
     dados_dict = dados.model_dump(exclude_unset=True)
     for chave, valor in dados_dict.items():
-        setattr(veiculo_db, chave, valor)
+        setattr(vinculo_db, chave, valor)
 
     db.commit()
-    db.refresh(veiculo_db) 
+    db.refresh(vinculo_db)
+    return {"message": "Vínculo atualizado com sucesso", "vinculo": vinculo_db}
 
-    return {"message": "Veículo atualizado com sucesso", "veiculo": veiculo_db}
+@motorista_veiculo.delete("/Apagar/{vinculo_id}")
+async def remover_vinculo(vinculo_id: int, db: Session = Depends(get_db)):
+    vinculo_db = db.query(MotoristaVeiculoModel).filter(MotoristaVeiculoModel.id == vinculo_id).first()
 
-@veiculo.delete("/deleteVeiculo/{veiculo_id}")
-async def deletar_veiculo(veiculo_id: int, db: Session = Depends(get_db)):
-    veiculo_db = db.query(VeiculoModel).filter(VeiculoModel.id == veiculo_id).first()
+    if not vinculo_db:
+        raise HTTPException(status_code=404, detail="Vínculo não encontrado")
 
-    if not veiculo_db:
-        raise HTTPException(status_code=404, detail="Veículo não encontrado")
-
-    db.delete(veiculo_db)
+    db.delete(vinculo_db)
     db.commit()
-    return {"message": "Veículo removido com sucesso"}
+    return {"message": "Vínculo removido com sucesso"}

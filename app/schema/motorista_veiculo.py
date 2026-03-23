@@ -5,8 +5,8 @@ from typing import Optional
 class MotoristaVeiculoSchema(BaseModel):
     id_motorista: int
     id_veiculo: int
-    datahora_inicio: datetime
-    datahora_fim: datetime
+    datahora_inicio: Optional[datetime] = None 
+    datahora_fim: Optional[datetime] = None
     
 
     class Config:

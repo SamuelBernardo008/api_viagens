@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 class VeiculoSchema(BaseModel):
     placa: str
-    id_modelo: int
+    id_modelo_veiculo: int
     tem_seguro: bool
     id_classe: int
 
