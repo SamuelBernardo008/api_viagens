@@ -23,6 +23,7 @@ class CorridaModel(Base):
     local_partida = Column(String(50), nullable=False)
     local_destino = Column(String(50), nullable=False)
     valor_estimado = Column(Float, nullable=False)
+    
     status = Column(Enum(StatusCorrida), default=StatusCorrida.pendente)
     
     passageiro = relationship("PassageiroModel", back_populates="corrida")

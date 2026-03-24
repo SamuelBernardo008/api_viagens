@@ -8,7 +8,6 @@ classe = APIRouter(tags=["Classes de Veículos"])
 
 @classe.post("/criar", response_model=ClasseSchema, status_code=status.HTTP_201_CREATED)
 async def criar_classe(dados: ClasseSchema, db: Session = Depends(get_db)):
-    # Validação para evitar classes com nomes idênticos
     classe_existe = db.query(ClasseModel).filter(ClasseModel.nome_classe == dados.nome_classe).first()
     if classe_existe:
         raise HTTPException(

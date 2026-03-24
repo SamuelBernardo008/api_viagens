@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.motorista_veiculo import MotoristaVeiculoModel
@@ -23,7 +23,7 @@ async def vincular_motorista(dados: MotoristaVeiculoSchema, db: Session = Depend
     # 3. Lógica extra (Opcional): Verificar se o veículo já está em uso (sem data_fim)
     uso_atual = db.query(MotoristaVeiculoModel).filter(
         MotoristaVeiculoModel.id_veiculo == dados.id_veiculo,
-        MotoristaVeiculoModel.datahora_fim == None
+        MotoristaVeiculoModel.datahora_fim.is_(None)
     ).first()
     
     if uso_atual:
